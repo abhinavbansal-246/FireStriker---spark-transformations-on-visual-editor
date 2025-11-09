@@ -38,12 +38,12 @@ const typeStyles = {
 };
 
 
-// FIX: The component now uses the specific `NodeProps<Step>` type to receive a typed `data` prop.
-const CustomNode: React.FC<NodeProps<Step>> = ({ data, selected }) => {
-  // FIX: A type assertion is used here because React Flow's type system for `nodeTypes` can
-  // sometimes fail to propagate the generic `Step` type, causing `data` to be inferred as `unknown`.
-  // This cast ensures type safety within the component.
-  const stepData = data as Step;
+// The component's props now use the base NodeProps to be compatible with the
+// NodeTypes object. A type assertion is used inside to handle the custom data.
+const CustomNode: React.FC<NodeProps> = ({ data, selected }) => {
+  // FIX: Cast through `unknown` first to satisfy stricter type checking rules.
+  // This correctly and safely asserts the `data` object to the `Step` type.
+  const stepData = data as unknown as Step;
   const styles = typeStyles[stepData.type];
 
   return (

@@ -2,7 +2,7 @@ import React from 'react';
 import { StepType } from '../types';
 import { ReadIcon, TransformIcon, AggregateIcon, JoinIcon, SQLIcon, WriteIcon, CodeIcon } from './icons';
 
-// FIX: Changed JSX.Element to React.ReactElement to resolve JSX namespace error.
+// FIX: Changed JSX.Element to React.ReactElement to resolve potential JSX namespace errors.
 const typeStyles: { [key in StepType]: { bgColor: string; borderColor: string; icon: React.ReactElement } } = {
   [StepType.Read]: {
     bgColor: 'bg-green-800/50 hover:bg-green-800',

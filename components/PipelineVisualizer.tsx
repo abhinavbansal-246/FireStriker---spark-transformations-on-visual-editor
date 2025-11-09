@@ -9,8 +9,7 @@ import {
   ReactFlowProvider, 
   useReactFlow 
 } from '@xyflow/react';
-// FIX: The `NodeTypes` import is no longer needed as the type will be inferred.
-import type { Node, Edge } from '@xyflow/react';
+import type { Node, Edge, NodeTypes } from '@xyflow/react';
 import { GoogleGenAI } from "@google/genai";
 import type { Step } from '../types';
 import { StepType } from '../types';
@@ -25,9 +24,9 @@ interface PipelineVisualizerProps {
   pipelineSteps: Step[];
 }
 
-// FIX: The explicit `NodeTypes` annotation is removed to allow TypeScript to correctly infer the type,
-// which is necessary when using custom nodes with generic data props.
-const nodeTypes = {
+// The nodeTypes constant is now explicitly typed, which is possible because
+// CustomNode has been updated to be compatible with the base NodeProps type.
+const nodeTypes: NodeTypes = {
   custom: CustomNode,
 };
 
@@ -56,7 +55,6 @@ const FlowCanvas: React.FC<PipelineVisualizerProps> = ({ pipelineSteps }) => {
   const [selectedNode, setSelectedNode] = useState<Step | null>(null);
 
   const { initialNodes, initialEdges } = useMemo(() => {
-    // FIX: Use the specific `Node<Step>` type to ensure type safety for node data.
     const nodes: Node<Step>[] = [];
     const edges: Edge[] = [];
     if (!pipelineSteps || pipelineSteps.length === 0) {
@@ -103,7 +101,6 @@ const FlowCanvas: React.FC<PipelineVisualizerProps> = ({ pipelineSteps }) => {
             x: level * 350 + 50,
             y: index * 150 + 50 - (levelNodes.length > 3 ? 100: 0),
           },
-          // FIX: The `data` property is now safely typed as `Step`, resolving the assignment error.
           data: step,
         });
 
@@ -124,11 +121,14 @@ const FlowCanvas: React.FC<PipelineVisualizerProps> = ({ pipelineSteps }) => {
   }, [pipelineSteps]);
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  // FIX: Explicitly type `useNodesState` with `Node<Step>` to ensure `nodes` and `setNodes` are correctly typed.
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node<Step>>(initialNodes);
+  // FIX: Removed the explicit generic `<Step>` from `useNodesState`.
+  // The hook will now correctly infer the type `Node<Step>[]` from `initialNodes`.
+  // This resolves a cascade of downstream type errors.
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
-  // FIX: Explicitly type `useReactFlow` with `<Step>` to ensure `getNodes` and other methods return correctly typed data.
-  const { screenToFlowPosition, getNodes } = useReactFlow<Step>();
+  // FIX: Removed the explicit generic `<Step>` from `useReactFlow`.
+  // This avoids a `Record<string, unknown>` constraint error that was causing compilation to fail.
+  const { screenToFlowPosition, getNodes } = useReactFlow();
 
   // Code Generation State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -136,7 +136,6 @@ const FlowCanvas: React.FC<PipelineVisualizerProps> = ({ pipelineSteps }) => {
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
 
-  // FIX: The node parameter is now correctly typed as `Node<Step>`, removing the need for an unsafe cast.
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node<Step>) => {
     setSelectedNode(node.data);
   }, []);
@@ -164,7 +163,6 @@ const FlowCanvas: React.FC<PipelineVisualizerProps> = ({ pipelineSteps }) => {
         y: event.clientY,
       });
 
-      // FIX: The new node is explicitly typed as `Node<Step>` for type safety.
       const newNode: Node<Step> = {
         id: `dndnode_${+new Date()}`,
         type: 'custom',
@@ -189,8 +187,10 @@ const FlowCanvas: React.FC<PipelineVisualizerProps> = ({ pipelineSteps }) => {
     setGenerationError(null);
 
     try {
+      if (!process.env.API_KEY) {
+        throw new Error("API_KEY environment variable not set");
+      }
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      // FIX: The `as Step` cast is no longer needed because `getNodes()` now correctly returns `Node<Step>[]`.
       const currentNodes = getNodes().map(node => node.data);
       const pipelineJson = JSON.stringify({ steps: currentNodes }, null, 2);
 
@@ -205,7 +205,7 @@ Based on this protocol, convert the following JSON object into a Scala Spark scr
 3.  Contain all necessary imports (e.g., 'org.apache.spark.sql.SparkSession', 'org.apache.spark.sql.functions._').
 4.  Process each step from the JSON. The result of each step should be stored in a DataFrame variable named after the step's 'id'.
 5.  Correctly handle dependencies by processing nodes in an order that respects the DAG. A step should only be processed after all its 'inputs' have been processed.
-6.  For the 'SQL' step type, you MUST register the input DataFrames as temporary views using their respective 'id's as the view names before executing the query.
+6.  For the 'SQL' step type, you MUST register the input DataFrames as a temporary views using their respective 'id's as the view names before executing the query.
 7.  For the 'Join' step, correctly parse the join condition string.
 8.  The final output should be ONLY the raw Scala code, without any explanatory text before or after. Enclose the code in a single markdown block for Scala.
 

@@ -1,5 +1,5 @@
 
-export const PROTOCOL_DEFINITION_MD_STRING = `
+export const PROTOCOL_DEFINITION_MD_STRING: string = `
 # Spark Pipeline JSON Protocol Definition
 
 This document defines a standardized, graph-based (DAG) JSON protocol for defining and executing Apache Spark SQL data pipelines.
@@ -72,7 +72,7 @@ Each object in the \`steps\` array represents a node in the pipeline's graph and
     -   \`partition_by\` (array of strings, optional): Columns to partition the output by.
 `;
 
-export const JSON_SCHEMA_STRING = `
+export const JSON_SCHEMA_STRING: string = `
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Spark Pipeline Protocol",
@@ -214,7 +214,7 @@ export const JSON_SCHEMA_STRING = `
 }
 `;
 
-export const EXAMPLE_PIPELINE_JSON_STRING = `
+export const EXAMPLE_PIPELINE_JSON_STRING: string = `
 {
   "steps": [
     {

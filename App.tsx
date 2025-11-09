@@ -7,7 +7,6 @@ import {
   EXAMPLE_PIPELINE_JSON_STRING,
   PROTOCOL_DEFINITION_MD_STRING
 } from './constants';
-import { SparkIcon } from './components/icons';
 import type { Step } from './types';
 
 type View = 'visualizer' | 'protocol' | 'schema';
@@ -15,7 +14,7 @@ type View = 'visualizer' | 'protocol' | 'schema';
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState<View>('visualizer');
 
-  const examplePipeline = useMemo(() => {
+  const examplePipeline = useMemo<Step[]>(() => {
     try {
       const parsed = JSON.parse(EXAMPLE_PIPELINE_JSON_STRING);
       return parsed.steps as Step[];
@@ -55,8 +54,8 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-gray-900 text-gray-200 font-sans flex flex-col">
       <header className="bg-gray-800 border-b border-gray-700 shadow-lg p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <SparkIcon className="h-8 w-8 text-blue-400" />
-          <h1 className="text-xl font-bold text-white tracking-wider">Spark Pipeline Protocol Visualizer</h1>
+          <img src="/logo.png" alt="FireStriker Logo" className="h-10 w-10" />
+          <h1 className="text-2xl font-bold text-white tracking-wider">FireStriker</h1>
         </div>
         <nav className="flex items-center gap-2">
           <NavButton view="visualizer" label="Example Pipeline Visualizer" />
