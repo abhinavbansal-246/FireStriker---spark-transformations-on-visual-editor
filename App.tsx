@@ -54,7 +54,7 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-gray-900 text-gray-200 font-sans flex flex-col">
       <header className="bg-gray-800 border-b border-gray-700 shadow-lg p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="FireStriker Logo" className="h-10 w-10" />
+          <img src="components/icons/FireStriker.png" alt="FireStriker Logo" className="h-10 w-10" />
           <h1 className="text-2xl font-bold text-white tracking-wider">FireStriker</h1>
         </div>
         <nav className="flex items-center gap-2">

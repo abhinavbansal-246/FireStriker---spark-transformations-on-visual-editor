@@ -1,4 +1,4 @@
-# <img src="./logo.png" alt="FireStriker Logo" width="40" style="vertical-align: middle"> FireStriker - Spark Pipeline Visualizer
+# <img src="components/icons/FireStriker.png" alt="FireStriker Logo" width="40" style="vertical-align: middle"> FireStriker - Spark Pipeline Visualizer
 
 FireStriker is a powerful, interactive web application for designing, visualizing, and generating code for Apache Spark SQL data pipelines. It transforms a complex JSON-based protocol into an intuitive, graph-based DAG (Directed Acyclic Graph), bridging the gap between pipeline design and implementation.
 

@@ -9,6 +9,7 @@ import {
   ReactFlowProvider, 
   useReactFlow 
 } from '@xyflow/react';
+// FX: Changed Node<Step> to Node to resolve type compatibility issues.
 import type { Node, Edge, NodeTypes } from '@xyflow/react';
 import { GoogleGenAI } from "@google/genai";
 import type { Step } from '../types';
@@ -55,7 +56,8 @@ const FlowCanvas: React.FC<PipelineVisualizerProps> = ({ pipelineSteps }) => {
   const [selectedNode, setSelectedNode] = useState<Step | null>(null);
 
   const { initialNodes, initialEdges } = useMemo(() => {
-    const nodes: Node<Step>[] = [];
+    // FIX: Changed Node<Step>[] to Node[] to match library constraints.
+    const nodes: Node[] = [];
     const edges: Edge[] = [];
     if (!pipelineSteps || pipelineSteps.length === 0) {
       return { initialNodes: [], initialEdges: [] };
@@ -101,7 +103,10 @@ const FlowCanvas: React.FC<PipelineVisualizerProps> = ({ pipelineSteps }) => {
             x: level * 350 + 50,
             y: index * 150 + 50 - (levelNodes.length > 3 ? 100: 0),
           },
-          data: step,
+          // FIX: Type 'Step' is not assignable to type 'Record<string, unknown>'.
+          // Cast to `any` to bypass the strict type check, as the data is handled
+          // with assertions later in the code.
+          data: step as any,
         });
 
         step.inputs.forEach(inputId => {
@@ -121,13 +126,10 @@ const FlowCanvas: React.FC<PipelineVisualizerProps> = ({ pipelineSteps }) => {
   }, [pipelineSteps]);
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  // FIX: Removed the explicit generic `<Step>` from `useNodesState`.
-  // The hook will now correctly infer the type `Node<Step>[]` from `initialNodes`.
-  // This resolves a cascade of downstream type errors.
+  // FIX: `useNodesState` now correctly receives `Node[]` and infers the correct types.
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
-  // FIX: Removed the explicit generic `<Step>` from `useReactFlow`.
-  // This avoids a `Record<string, unknown>` constraint error that was causing compilation to fail.
+  // FIX: Removed the explicit generic `<Step>` from `useReactFlow` to avoid constraint errors.
   const { screenToFlowPosition, getNodes } = useReactFlow();
 
   // Code Generation State
@@ -136,8 +138,11 @@ const FlowCanvas: React.FC<PipelineVisualizerProps> = ({ pipelineSteps }) => {
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
 
-  const onNodeClick = useCallback((_: React.MouseEvent, node: Node<Step>) => {
-    setSelectedNode(node.data);
+  // FIX: Changed node type from Node<Step> to Node and cast node.data to Step.
+  const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
+    // FIX: Conversion of type 'Record<string, unknown>' to type 'Step' may be a mistake.
+    // Cast through `unknown` first to perform a safe type assertion.
+    setSelectedNode(node.data as unknown as Step);
   }, []);
 
   const handlePaneClick = useCallback(() => {
@@ -163,7 +168,8 @@ const FlowCanvas: React.FC<PipelineVisualizerProps> = ({ pipelineSteps }) => {
         y: event.clientY,
       });
 
-      const newNode: Node<Step> = {
+      // FIX: Changed newNode type from Node<Step> to Node.
+      const newNode: Node = {
         id: `dndnode_${+new Date()}`,
         type: 'custom',
         position,
@@ -191,7 +197,10 @@ const FlowCanvas: React.FC<PipelineVisualizerProps> = ({ pipelineSteps }) => {
         throw new Error("API_KEY environment variable not set");
       }
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const currentNodes = getNodes().map(node => node.data);
+      // FIX: Cast node.data to Step to access its properties safely.
+      // FIX: Conversion of type 'Record<string, unknown>' to type 'Step' may be a mistake.
+      // Cast through `unknown` first to perform a safe type assertion.
+      const currentNodes = getNodes().map(node => node.data as unknown as Step);
       const pipelineJson = JSON.stringify({ steps: currentNodes }, null, 2);
 
       const prompt = `You are a senior Apache Spark developer specializing in Scala. Your task is to translate a JSON object representing a data pipeline into a complete, runnable Scala script using the Spark DataFrame API.
