@@ -1,0 +1,5 @@
+{
+  "name": "Stoce - Spark transformations on configuration editor",
+  "description": "An interactive web application to visualize and inspect a graph-based JSON protocol for defining Apache Spark SQL data pipelines. It includes a protocol definition viewer, a JSON schema validator, and an interactive DAG visualizer for an example pipeline.",
+  "requestFramePermissions": []
+}
